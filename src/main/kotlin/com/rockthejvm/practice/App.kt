@@ -5,7 +5,6 @@ import javax.swing.JPanel
 import javax.swing.WindowConstants
 import java.awt.Dimension
 import java.awt.Graphics
-import java.awt.image.BufferedImage
 
 object App {
     private lateinit var imagePanel: ImagePanel
@@ -44,3 +43,25 @@ object App {
         load("src/main/resources/pictures/paris.jpeg")
     }
 }
+/**
+ * TODO exercise 1
+ *      Create a CommandLine singleton with a forever system.in reader.
+ *      Just read the lines and print them back for now.
+ *      When the CommandLine reads "load (path)" you'll make the ImageEditor display the image at that path in a window.
+ *      The command "exit" will exit the application.
+ *      Any other command will be simply shown back to you.
+ *
+ *
+ * TODO exercise 2
+ *      Create a Transformation type with a simple API to take an image and return another image.
+ *      Make a factory of the following types of transformations
+ *          - CropTransformation(x,y,w,h)
+ *          - BlendTransformation(path, mode)
+ *      What signature would the factory method have?
+ *      Where would you put that factory?
+ *      From the command line app, trigger the transformation changes.
+ *          Possible commands:
+ *              - crop x y w h
+ *              - blend path mode
+ */
+
