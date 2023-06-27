@@ -122,13 +122,7 @@ object DesignPatterns {
             return result        }
     }
 
-    // builder
-    // command
-    // observer
-    // visitor
-
-    @JvmStatic
-    fun main(args: Array<String>) {
+    fun demoStrategy() {
         val strategy = LayoutStrategy.create("simple")
         val posts = strategy.layout(
             listOf(
@@ -136,7 +130,135 @@ object DesignPatterns {
                 "Cras molestie tellus ac lacus fermentum, nec aliquet nisl porta. Praesent justo nibh, aliquam quis nisi a, finibus tempor velit. Cras porttitor sapien in diam convallis, vitae commodo metus fringilla. Fusce convallis convallis felis, in laoreet ex rhoncus vitae. Suspendisse ullamcorper leo at purus convallis, maximus tempus felis pulvinar. Sed congue turpis sit amet erat malesuada blandit. Curabitur egestas orci vitae magna gravida gravida. Etiam facilisis nisl eu ligula fringilla mattis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum lacinia velit ligula, eu varius dui aliquet quis. Curabitur efficitur augue nec est gravida tempus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Fusce ultrices metus eu auctor posuere. Morbi gravida scelerisque augue, ac congue ligula pulvinar sed."
             )
         )
-
         posts.forEach { println(it) }
+    }
+
+    // builder - useful for configurable data structures & constructors with lots of args
+    data class SparkSession(
+        val masterNode: String,
+        val nExecutors: Int,
+        val jars: List<String>,
+        val configs: List<String>
+    ) {
+        // nested class
+        class Builder { // mutable instance
+            var masterNode: String = ""
+            var nExecutors: Int = 0
+            var jars: MutableList<String> = mutableListOf()
+            var configs: MutableList<String> = mutableListOf()
+
+            // setters for ALL FIELDS
+            fun withMasterNode(master: String): Builder {
+                this.masterNode = master
+                return this
+            }
+
+            fun withNExecutors(n: Int): Builder {
+                this.nExecutors = n
+                return this
+            }
+
+            fun withJar(jar: String): Builder {
+                this.jars.add(jar)
+                return this
+            }
+
+            fun withConfig(config: String): Builder {
+                this.configs.add(config)
+                return this
+            }
+
+            // with a final build method
+            fun build(): SparkSession =
+                SparkSession(masterNode, nExecutors, jars, configs)
+        }
+
+        companion object {
+            fun builder() = Builder()
+        }
+    }
+
+    val spark = SparkSession.builder()
+        .withJar("com.rockthejvm....")
+        .withJar("com.typesafe.akka")
+        .withConfig("--executor-memory 5g")
+        .withMasterNode("localhost")
+        .withNExecutors(2)
+        .build()
+
+    // observer
+
+    // notification
+    data class Notification(val app: String, val content: String)
+    // observable/"notifier"
+    class Smartphone {
+        val observers: MutableSet<Observer> = mutableSetOf()
+
+        // add/remove subscriptions
+        fun addObserver(obs: Observer) {
+            observers.add(obs)
+        }
+
+        fun removeObserver(obs: Observer) {
+            observers.remove(obs)
+        }
+
+        // notify observers
+        private fun notifyObservers(notification: Notification) {
+            for (obs in observers)
+                obs.update(notification)
+        }
+
+        // change state
+        private fun invokeGmailService(): List<String> =
+            listOf("Your tickets to Untold", "You got a new message")
+
+        // public API
+        fun checkEmail(account: String) {
+            // call Gmail API
+            val emails = invokeGmailService()
+            notifyObservers(Notification("Gmail", "You got ${emails.size} emails"))
+        }
+
+        fun receivePhoneCall() {
+            notifyObservers(Notification("phone", "dad calling"))
+        }
+    }
+
+    // observer/listener
+    interface Observer {
+        fun update(notification: Notification)
+    }
+
+    object UIObserver: Observer {
+        override fun update(notification: Notification) {
+            println("[notification center] ${notification.content}")
+        }
+    }
+
+    class BackupObserver(val location: String): Observer {
+        override fun update(notification: Notification) {
+            // potentially DIFFERENT impl
+            println("[$location] Log successful: ${notification.app} - ${notification.content}")
+        }
+    }
+
+    fun demoObserver() {
+        val phone = Smartphone()
+        phone.addObserver(UIObserver)
+        phone.addObserver(BackupObserver("Google Drive"))
+        phone.addObserver(BackupObserver("local disk"))
+
+        // in some other place in the code
+        phone.checkEmail("daniel@rockthejvm.com")
+        phone.receivePhoneCall()
+    }
+
+    // command
+    // visitor
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        demoObserver()
     }
 }
