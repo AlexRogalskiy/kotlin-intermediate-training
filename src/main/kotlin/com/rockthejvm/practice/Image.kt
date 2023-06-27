@@ -11,7 +11,7 @@ class Image(val bfImage: BufferedImage) {
 
     init {
         val pixelsInts = bfImage.getRGB(0, 0, width, height, IntArray(width * height), 0, width)
-        for (i in 0..(width * height))
+        for (i in 0 until (width * height))
             pixels.add(pixelsInts[i].toColor())
     }
 
@@ -27,35 +27,11 @@ class Image(val bfImage: BufferedImage) {
         fun fromPixels(width: Int, height: Int, pixels: List<Color>): Image {
             val bfImage = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
             val pixelsInts = IntArray(width * height)
-            for (i in 0..(width * height))
+            for (i in 0 until (width * height))
                 pixelsInts[i] = pixels[i].toInt()
 
             bfImage.setRGB(0,0,width,height, pixelsInts, 0, width)
             return Image(bfImage)
         }
     }
-
-    /**
-     * TODO write an Image class that wraps a BufferedImage
-     *  - constructor(BufferedImage)
-     *  - width, height, pixels: List<Color>, get[x,y]: Color
-     *  - write(file: String): Unit = stores a picture file
-     *
-     * TODO write a Filter class
-     *  - process(Image): Image
-     *
-     * TODO implement some instances of Filter
-     *  - Blend(fgImag) -> mix fgImage with image in the process function
-     *      Transparency - average of colors
-     *      Multiply - (colorA / 255) * (colorB / 255) * 255
-     *  - Crop(x,y,w,h) -> new (smaller) image
-     */
-
-
-    /*
-        write a BufferedImage:
-            ImageIO.write(bufferedImage, "JPG", File(...))
-        read a BufferedImage
-            bfImg = ImageIO.read(File(...))
-     */
 }

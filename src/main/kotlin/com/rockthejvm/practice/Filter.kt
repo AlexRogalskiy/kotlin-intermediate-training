@@ -18,7 +18,7 @@ class Blend(val fgImage: Image, val mode: BlendMode): Filter() {
         val width = bgImage.width
         val height = bgImage.height
         val pixels = mutableListOf<Color>()
-        for (i in 0..(width * height))
+        for (i in 0 until (width * height))
             pixels.add(mode.combine(fgImage.pixels[i], bgImage.pixels[i]))
 
         return Image.fromPixels(width, height, pixels)
