@@ -16,6 +16,7 @@ object CommandLine {
             when (cmd) {
                 "load" -> AppUI.load(tokens[1])
                 "exit" -> exitProcess(0)
+                "undo" -> TODO("think about it!")
                 else -> {
                     val transformation = Transformation.parse(command)
                     val newImage = transformation.process(AppUI.getImage())

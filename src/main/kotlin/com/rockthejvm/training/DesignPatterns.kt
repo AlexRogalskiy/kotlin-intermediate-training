@@ -254,11 +254,158 @@ object DesignPatterns {
         phone.receivePhoneCall()
     }
 
-    // command
     // visitor
+
+    // visitable
+    interface FileSystemNode {
+        fun accept(visitor: Visitor)
+    }
+
+    data class SimpleFile(val name: String, val contents: String): FileSystemNode {
+        override fun accept(visitor: Visitor) =
+            visitor.visit(this)
+    }
+
+    data class Directory(val name: String, val nodes: List<FileSystemNode>): FileSystemNode {
+        override fun accept(visitor: Visitor) {
+           visitor.visit(this)
+        }
+    }
+
+    // visitor
+    interface Visitor {
+        fun visit(file: SimpleFile)
+        fun visit(directory: Directory)
+    }
+
+    class FileSystemPrinter: Visitor {
+        override fun visit(directory: Directory) {
+            for (node in directory.nodes)
+                node.accept(this)
+        }
+
+        override fun visit(file: SimpleFile) {
+            println("rwxrwxrwx ${file.name} ${file.contents.length}")
+        }
+    }
+
+    class DiskUsageAnalyzer: Visitor {
+        var totalSize = 0
+        override fun visit(directory: Directory) {
+            for (node in directory.nodes)
+                node.accept(this)
+        }
+
+        override fun visit(file: SimpleFile) {
+            totalSize += file.contents.length
+        }
+    }
+
+    /*
+        dir =
+            /src
+                /main
+                    /resources
+                        paris.jpg
+                        redblue.jpg
+                    patterns.kt
+        dir.accept(FileSystemPrinter)
+
+     */
+    fun demoVisitor() {
+        val dir = Directory("resources", listOf(
+            Directory("pictures", listOf(SimpleFile("otherpic.jpg", "unknown picture"))),
+            SimpleFile("paris.jpg", "paris picture"),
+            SimpleFile("redblue.jpg", "nice gradient!!!!!!!!!!!!!!!"),
+        ))
+        dir.accept(FileSystemPrinter())
+        val analyzer = DiskUsageAnalyzer()
+        dir.accept(analyzer) // run analysis
+        println("Total size: ${analyzer.totalSize} bytes")
+
+
+    }
+
+    // command
+    interface Command {
+        fun execute(): Unit
+        fun undo(): Unit
+    }
+
+    class Notepad {
+        var text: String = ""
+        val history: MutableList<Command> = mutableListOf() // for undo/cmd-z
+        val nextHistory: MutableList<Command> = mutableListOf() // for cmd-shift-z, for redo()
+
+        fun type(char: Char) {
+            println("[log] typed $char")
+            runCommand(TypeCommand(char))
+        }
+
+        fun delete() {
+            println("[log] backspace")
+            runCommand(DeleteCommand())
+        }
+
+        private fun runCommand(command: Command) {
+            nextHistory.clear()
+            history.add(command)
+            command.execute()
+        }
+
+        fun undo() {
+            println("[log] undo")
+            val command = history.last()
+            history.removeLast()
+            nextHistory.add(command)
+            command.undo()
+        }
+
+        fun redo() {
+            val command = nextHistory.removeLast()
+            history.add(command)
+            command.execute()
+        }
+
+        private inner class TypeCommand(val char: Char): Command {
+            override fun execute() {
+                text += char
+            }
+
+            override fun undo() {
+                text = text.substring(0, text.length - 1)
+            }
+        }
+
+        private inner class DeleteCommand: Command {
+            var charToDelete: Char = ' '
+
+            override fun execute() {
+                charToDelete = text[text.length - 1]
+                text = text.substring(0, text.length - 1)
+            }
+
+            override fun undo() {
+                text += charToDelete
+            }
+        }
+
+    }
+
+    fun demoCommand() {
+        val notepad = Notepad()
+        for (char in "this is a test for command pattern")
+            notepad.type(char)
+        for (i in 1..5)
+            notepad.delete()
+        for (i in 0..2)
+            notepad.undo()
+        notepad.redo()
+        println(notepad.text)
+    }
 
     @JvmStatic
     fun main(args: Array<String>) {
-        demoObserver()
+        demoCommand()
     }
 }
