@@ -8,5 +8,8 @@ object App {
 
         val combined = Blend(gradient, Multiply()).process(paris)
         combined.write("src/main/resources/results/paris-red.jpg")
+
+        val cropped = Crop(400, 400, 500, 500).process(paris)
+        cropped.write("src/main/resources/results/paris-cropped.jpg")
     }
 }

@@ -4,10 +4,17 @@ abstract class Filter {
     abstract fun process(image: Image): Image
 }
 
-class Crop(x: Int, y: Int, w: Int, h: Int): Filter() {
-    override fun process(image: Image): Image {
-        TODO("Not yet implemented")
-    }
+class Crop(val x: Int, val y: Int, val w: Int, val h: Int): Filter() {
+    override fun process(image: Image): Image =
+        Image.fromPixels(
+            w,
+            h,
+            image.pixels
+                .chunked(image.width)
+                .slice(y until (y + h))
+                .map { it.slice(x until (x + w)) }
+                .flatten()
+        )
 }
 
 class Blend(val fgImage: Image, val mode: BlendMode): Filter() {
