@@ -90,12 +90,53 @@ object DesignPatterns {
     val aWindow = uiFactory.makeWindow()
 
     // strategy
+    data class Post(val content: String)
+
+    interface LayoutStrategy {
+        fun layout(news: List<String>): List<Post>
+        // easily combined with factory
+        companion object {
+            fun create(strategy: String) = when(strategy) {
+                "compact" -> CompactStrategy(20)
+                else -> SimpleStrategy
+            }
+        }
+    }
+
+    class CompactStrategy(val charLimit: Int): LayoutStrategy {
+        override fun layout(news: List<String>): List<Post> {
+            val result: MutableList<Post> = mutableListOf()
+            for (article in news)
+                result.add(
+                    Post(article.chunked(charLimit).joinToString("\n"))
+                )
+            return result
+        }
+    }
+
+    object SimpleStrategy: LayoutStrategy {
+        override fun layout(news: List<String>): List<Post> {
+            val result: MutableList<Post> = mutableListOf()
+            for (article in news)
+                result.add(Post(article))
+            return result        }
+    }
+
+    // builder
     // command
     // observer
     // visitor
 
     @JvmStatic
     fun main(args: Array<String>) {
+        val strategy = LayoutStrategy.create("simple")
+        val posts = strategy.layout(
+            listOf(
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ullamcorper, leo et ornare tincidunt, nunc augue finibus justo, eget malesuada libero magna quis elit. Donec congue lorem dictum porta finibus. Praesent ut diam tortor. Maecenas vulputate dignissim iaculis. Maecenas nisl metus, volutpat quis tincidunt vitae, ullamcorper vitae erat. Etiam pharetra interdum sodales. Praesent sit amet quam et dui pretium condimentum. Ut aliquam malesuada ornare. Integer nulla ligula, lobortis vel malesuada id, blandit vel lectus. Maecenas quis lacus sed nisl elementum sollicitudin vel sit amet est. Curabitur mollis massa sed tellus commodo hendrerit. Morbi ultrices augue ut est pretium aliquet nec vitae neque. Morbi dignissim libero eget nunc vestibulum suscipit. Etiam maximus dolor quis ante tincidunt, at convallis nulla tristique. Aenean pharetra nisi erat, ut accumsan metus tempor et.",
+                "Cras molestie tellus ac lacus fermentum, nec aliquet nisl porta. Praesent justo nibh, aliquam quis nisi a, finibus tempor velit. Cras porttitor sapien in diam convallis, vitae commodo metus fringilla. Fusce convallis convallis felis, in laoreet ex rhoncus vitae. Suspendisse ullamcorper leo at purus convallis, maximus tempus felis pulvinar. Sed congue turpis sit amet erat malesuada blandit. Curabitur egestas orci vitae magna gravida gravida. Etiam facilisis nisl eu ligula fringilla mattis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum lacinia velit ligula, eu varius dui aliquet quis. Curabitur efficitur augue nec est gravida tempus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Fusce ultrices metus eu auctor posuere. Morbi gravida scelerisque augue, ac congue ligula pulvinar sed."
+            )
+        )
 
+        posts.forEach { println(it) }
     }
 }
