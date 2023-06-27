@@ -2,6 +2,15 @@ package com.rockthejvm.practice
 
 interface BlendMode {
     fun combine(fg: Color, bg: Color): Color
+
+    // factory
+    companion object {
+        fun parse(mode: String): BlendMode = when(mode) {
+            "transparency" -> Transparency(0.5)
+            "multiply" -> Multiply()
+            else -> NoBlend
+        }
+    }
 }
 
 class Transparency(f: Double): BlendMode {
@@ -18,4 +27,8 @@ class Multiply: BlendMode {
             (fg.green * bg.green / 255.0).toInt(),
             (fg.blue * bg.blue / 255.0).toInt(),
         )
+}
+
+object NoBlend: BlendMode {
+    override fun combine(fg: Color, bg: Color): Color = fg
 }

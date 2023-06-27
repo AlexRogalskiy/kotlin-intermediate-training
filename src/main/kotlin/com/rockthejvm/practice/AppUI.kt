@@ -6,10 +6,10 @@ import javax.swing.WindowConstants
 import java.awt.Dimension
 import java.awt.Graphics
 
-object App {
+object AppUI {
     private lateinit var imagePanel: ImagePanel
 
-    class ImagePanel(private var image: Image) : JPanel() {
+    class ImagePanel(var image: Image) : JPanel() {
         override fun paintComponent(g: Graphics) {
             super.paintComponent(g)
             g.drawImage(image.bfImage, 0, 0, null)
@@ -38,11 +38,19 @@ object App {
         frame.isVisible = true
     }
 
-    @JvmStatic
-    fun main(args: Array<String>) {
-        load("src/main/resources/pictures/paris.jpeg")
-    }
+    fun getImage(): Image =
+        imagePanel.image
+
+    fun update(image: Image) =
+        imagePanel.updateImage(image)
+
+//    @JvmStatic
+//    fun main(args: Array<String>) {
+//        load("src/main/resources/pictures/paris.jpeg")
+//    }
 }
+
+
 /**
  * TODO exercise 1
  *      Create a CommandLine singleton with a forever system.in reader.
