@@ -107,10 +107,45 @@ object OptionDemo {
      *  - if all optionals are empty, return empty string
      */
     val strings: List<Option<String>> = listOf(Some("Kotlin"), None, Some("functional"), None, Some("programming"))
+    val concats = strings
+        .filter { it.isNotEmpty() }
+        .reduce { a,b ->
+            a.flatMap { va: String ->
+                b // option<String>
+                    .map { vb: String -> va.length + vb.length } // option<int>
+            }
+        }
+        .getOrElse { "" }
 
+    val concats_v2 = strings.fold("") { acc, maybeString ->
+        acc + maybeString.getOrElse { "" }
+    }
+    val concats_v3 = strings
+        .map { it.getOrElse { "" } }
+        .joinToString("")
+
+    val a: Option<String> = Some("Kotlin")
+    val b: Option<String> = None
+    val combination = a.flatMap { va: String ->
+        b // option<String>
+            .map { vb: String -> va.length + vb.length } // option<int>
+    }
+
+    // map works on List, Array, Set, Map, Option, Result, Either, Stream, ...
+    // returns container of the same type
+
+    // flatMap works on List, Array, Set, Map, Option, Result, Either, Stream, ...
+    // takes function A -> container<B>
 
     @JvmStatic
     fun main(args: Array<String>) {
-
+        println(concats)
+        println(concats_v2)
+        println(concats_v3)
     }
+}
+
+interface Lazy<A> {
+    fun <B> map(f: (A) -> B): Lazy<B>
+    fun <B> flatMap(f: (A) -> Lazy<B>): Lazy<B>
 }
