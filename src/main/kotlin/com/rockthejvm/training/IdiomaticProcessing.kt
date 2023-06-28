@@ -112,7 +112,7 @@ object OptionDemo {
         .reduce { a,b ->
             a.flatMap { va: String ->
                 b // option<String>
-                    .map { vb: String -> va.length + vb.length } // option<int>
+                    .map { vb: String -> va + vb } // option<int>
             }
         }
         .getOrElse { "" }
@@ -137,15 +137,38 @@ object OptionDemo {
     // flatMap works on List, Array, Set, Map, Option, Result, Either, Stream, ...
     // takes function A -> container<B>
 
+    /**
+     * TODO exercise
+     */
+    fun getConfig(): Map<String, String> = mapOf(
+        "host" to "myservice.corp.google.com",
+        "port" to "9091"
+    )
+
+    class Connection {
+        fun connect() {
+            println("connection established")
+        }
+
+        companion object {
+            val random = kotlin.random.Random(System.currentTimeMillis())
+            fun make(host: String, port: Int): Connection? =
+                if (random.nextBoolean()) Connection()
+                else null
+        }
+    }
+
+    // obtain a connection, call connect() on it.
+    // if no connection, try again after 1s.
+    // repeat until you have a connection.
+
+
     @JvmStatic
     fun main(args: Array<String>) {
         println(concats)
         println(concats_v2)
         println(concats_v3)
-    }
-}
 
-interface Lazy<A> {
-    fun <B> map(f: (A) -> B): Lazy<B>
-    fun <B> flatMap(f: (A) -> Lazy<B>): Lazy<B>
+        println (strings.count { it.isNotEmpty() })
+    }
 }
