@@ -74,11 +74,44 @@ object FunctionalProgramming {
      *      ["kotlin", "is", "cool"] -> "kotliniscool"
      *      - reduce
      *      - fold
+     *  - concatenate "kotlin" n times.
      */
+
+    // 1 -
+    val strings = listOf("kotlin", "is", "cool")
+    val listLengths = strings.map { it.length }
+    // 2 -
+    val numbers1 = listOf(1,2,3,4)
+    val numbers2 = listOf(5,6,7,8)
+    val sums = numbers1.zip(numbers2).map { it.first + it.second }
+    val sums_v2 = numbers1.zip(numbers2, { a, b -> a + b }) // "correct" call
+    val sums_v2_sugar = numbers1.zip(numbers2) { a, b -> a + b } // same
+    // 3 -
+    val chars = listOf("a", "b", "c")
+    val combinations = numbers1.flatMap { number ->
+        chars.map { char -> number.toString() + char }
+    }
+    val combinations_v2 = numbers1 // list<int>
+        .map { a ->  // int -> list<int>
+            chars.map { b -> "$a$b" }
+        } // list<list<int>>
+        .flatMap { it /* <- list<int> */} // list<int>
+
+    // 4 -
+    val statement = strings.reduce { acc, elem -> acc + elem }
+    val statement_v2 = strings.fold("") { acc, elem -> acc + elem }
+    // 5 -
+    val kotlinxn = { n: Int -> (1..n).fold("") { acc, _ -> acc + "Kotlin" } }
+    val kotlinxn_v2 = { n: Int -> (1..n).map { "Kotlin" }.joinToString("") }
 
     @JvmStatic
     fun main(args: Array<String>) {
-
+        println(listLengths)
+        println(combinations)
+        println(statement)
+        println(statement_v2)
+        println(kotlinxn(5))
+        println(kotlinxn_v2(5))
     }
 
 }
