@@ -2,6 +2,7 @@ package com.rockthejvm.training
 
 import arrow.core.*
 import java.util.Random
+import kotlin.math.max
 
 object IdiomaticProcessing {
 
@@ -85,6 +86,7 @@ object OptionDemo {
         else None
 
     val anOption: Option<Int> = Option.fromNullable(gimmeMeaningOfLife())
+    val anOption_v2 = gimmeMeaningOfLife().toOption()
     // 2 subtypes - Some(value), None
     val aNonEmptyOption: Option<Int> = Some(42)
     val anEmptyOption: Option<Int> = None
@@ -139,6 +141,10 @@ object OptionDemo {
 
     /**
      * TODO exercise
+            - obtain a connection, call connect() on it.
+            - if no connection, try again after 1s.
+            - repeat until you have a connection.
+       Use Thread.sleep(1000) to wait for 1s.
      */
     fun getConfig(): Map<String, String> = mapOf(
         "host" to "myservice.corp.google.com",
@@ -146,9 +152,8 @@ object OptionDemo {
     )
 
     class Connection {
-        fun connect() {
-            println("connection established")
-        }
+        fun connect(): String =
+            "connection established"
 
         companion object {
             val random = kotlin.random.Random(System.currentTimeMillis())
@@ -158,17 +163,48 @@ object OptionDemo {
         }
     }
 
-    // obtain a connection, call connect() on it.
-    // if no connection, try again after 1s.
-    // repeat until you have a connection.
+    fun demoConnection() {
+        val config = getConfig()
+        val host = config["host"]
+        val port = config["port"]
+        if (host != null && port != null) {
+            while (true) {
+                val connection = Connection.make(host, port.toInt())
+                if (connection != null) {
+                    println(connection.connect())
+                    break
+                } else {
+                    println("retrying...")
+                    Thread.sleep(1000)
+                }
+            }
+        }
+    }
+
+    fun retryConnection(maxAttempts: Int = 2, currentCounter: Int = 1): Option<Connection> {
+        val config = getConfig()
+        val host = config["host"].toOption()
+        val port = config["port"].toOption()
+        val maybeConnection: Option<Connection> = host.flatMap { h ->
+            port.flatMap { p ->
+                Connection.make(h,p.toInt()).toOption()
+                    .orElse {
+                        println("retrying..")
+                        Thread.sleep(1000)
+                        if (currentCounter < maxAttempts)
+                            retryConnection(maxAttempts, currentCounter + 1)
+                        else None
+                    }
+            }
+        }
+        return maybeConnection
+    }
+
+    // TODO stream generators
 
 
     @JvmStatic
     fun main(args: Array<String>) {
-        println(concats)
-        println(concats_v2)
-        println(concats_v3)
-
-        println (strings.count { it.isNotEmpty() })
+        retryConnection().map(Connection::connect).map { println(it) }
     }
 }
